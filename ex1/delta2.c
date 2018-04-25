@@ -12,13 +12,13 @@ int main () {
     double f_diff,delta;
     double h = 1;
     // csvファイルに出力するためにカンマ区切りにする
-    printf("step, delta\n");
+    printf("#step delta\n");
     for(int i = 0; i < MAX_COUNT; i++){
         // 変化先を見る
         f_diff = sin(x+h);
         // 微分の定義式
         delta = (f_diff - f_base) / h;
-        printf("%lf, %lf\n", h, delta);
+        printf("%lf %lf\n", h, delta);
         h = h / 2;
     }
     return 0;
