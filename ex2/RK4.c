@@ -28,12 +28,27 @@ double delta_v (double x, double v) {
 
 // 現在のv,xを元に次のv,xを錬成する関数
 // パラメーターhを必要とする
+// 今回はRK法なのでさらに複雑です。
+// x, v双方にRK法を適用しつつ計算をしていく
 double next_vx (double *x, double *v, double h) {
-    double a = delta_v(*x, *v);
+    double k1 = h * delta_v(*x, *v);
+    double k2 = h * delta_v(
+        *x + *v * h / 2.0,
+        *v + k1 / 2.0
+    );
+    double k3 = h * delta_v(
+        *x + *v * h / 2.0,
+        *v + k2 / 2.0        
+    );
+    double k4 = h * delta_v(
+        *x + *v * h,
+        *v + k3
+    );
+    double va = *v + k1 / 6.0 + k2 / 3.0 + k3 / 3.0 + k4 / 6.0;
     // 現在の速度のままhだけ進んだらどうなるか
-    *x = *x + h * *v;
+    *x = *x + h * va;
     // 速度を更新(現在の加速度のままhだけ進んだらどうなるか)
-    *v = *v + h * a;
+    *v = va;
     return 0.0;
 }
 

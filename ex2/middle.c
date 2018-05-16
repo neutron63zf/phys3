@@ -28,12 +28,19 @@ double delta_v (double x, double v) {
 
 // 現在のv,xを元に次のv,xを錬成する関数
 // パラメーターhを必要とする
+// 今回は中点法なので少し複雑です。
 double next_vx (double *x, double *v, double h) {
+    // 現在時点での加速度
     double a = delta_v(*x, *v);
+    // Euler法による、「h/2経過した」ときの状態
+    double vc = *v + ( h / 2.0 ) * a;
+    double xc = *x + ( h / 2.0 ) * *v;
+    // その状態での加速度を求める
+    double ac = delta_v(xc, vc);
     // 現在の速度のままhだけ進んだらどうなるか
-    *x = *x + h * *v;
+    *x = *x + h * vc;
     // 速度を更新(現在の加速度のままhだけ進んだらどうなるか)
-    *v = *v + h * a;
+    *v = *v + h * ac;
     return 0.0;
 }
 
