@@ -45,7 +45,7 @@ int main (int argc, char *argv[]) {
     double x = x0;
     double v = v0;
     for (int i = 0; i * h <= targetSec ; i++){
-        printf("%lf %lf %lf %lf\n", t, x, v, 1.0/2.0*m*v*v+1.0/2.0*k*x*x);
+        printf("%lf %lf\n", t, 1.0/2.0*m*v*v+1.0/2.0*k*x*x);
         next_pq(&x, &v, h);
         t += h;
     }

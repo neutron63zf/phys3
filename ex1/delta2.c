@@ -8,7 +8,7 @@ int main () {
     // 基準点の値を入れる
     double f_base = sin(x);
     // 精度の限界
-    int MAX_COUNT = 25;
+    int MAX_COUNT = 21;
     double f_diff,delta;
     double h = 1;
     // csvファイルに出力するためにカンマ区切りにする
@@ -18,7 +18,7 @@ int main () {
         f_diff = sin(x+h);
         // 微分の定義式
         delta = (f_diff - f_base) / h;
-        printf("%lf %lf\n", h, delta);
+        printf("%lf %lf\n", h, fabs(delta-cos(x)));
         h = h / 2;
     }
     return 0;

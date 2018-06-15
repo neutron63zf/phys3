@@ -4,7 +4,7 @@
 // 繰り返し回数の上限
 #define MAX_COUNT 25
 // 最初の点
-#define START_POINT -100
+#define START_POINT 1.25
 
 double input_fn (double x) {
     return tanh(x) + 0.2 * x + 0.3;

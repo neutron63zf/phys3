@@ -37,6 +37,13 @@ double next_vx (double *x, double *v, double h) {
     return 0.0;
 }
 
+// 真の値
+double true_val (double t) {
+    double gamma = kappa / (2.0 * m);
+    double w = sqrt(k/m - pow(gamma,2));
+    return x0 * exp(-gamma*t) * cos(w*t);
+}
+
 // コマンドライン引数による処理の分岐
 int main (int argc, char *argv[]) {
     double t = 0;
@@ -44,7 +51,11 @@ int main (int argc, char *argv[]) {
     double x = x0;
     double v = v0;
     for (int i = 0; i * h <= targetSec ; i++){
-        printf("%lf %lf %lf\n", t, x, v);
+        // printf("%lf %lf %lf\n", t, x, v);
+        
+        printf("%lf %lf\n", t, fabs(
+            x-true_val(t)
+        ));
         next_vx(&x, &v, h);
         t += h;
     }

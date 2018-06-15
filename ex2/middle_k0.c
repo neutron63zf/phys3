@@ -26,21 +26,29 @@ double delta_v (double x, double v) {
     return ( -k * x - kappa * v ) / m;
 }
 
+// 速度を求める関数
+// vなのだが、明示的にxの微分を得るために使用する
+double delta_x (double x, double v) {
+    return v;
+}
+
 // 現在のv,xを元に次のv,xを錬成する関数
 // パラメーターhを必要とする
 // 今回は中点法なので少し複雑です。
 double next_vx (double *x, double *v, double h) {
-    // 現在時点での加速度
-    double a = delta_v(*x, *v);
-    // Euler法による、「h/2経過した」ときの状態
-    double vc = *v + ( h / 2.0 ) * a;
-    double xc = *x + ( h / 2.0 ) * *v;
-    // その状態での加速度を求める
-    double ac = delta_v(xc, vc);
-    // 現在の速度のままhだけ進んだらどうなるか
-    *x = *x + h * vc;
-    // 速度を更新(現在の加速度のままhだけ進んだらどうなるか)
-    *v = *v + h * ac;
+    double k1 = h * delta_v(*x, *v);
+    double l1 = h * delta_x(*x, *v);
+    double k2 = h * delta_v(
+        *x + 1.0 / 2.0 * k1,
+        *v + 1.0 / 2.0 * l1
+    );
+    double l2 = h * delta_x(
+        *x + 1.0 / 2.0 * k1,
+        *v + 1.0 / 2.0 * l1
+    );
+    // 位置・速度を更新
+    *x = *x + l2;
+    *v = *v + k2;
     return 0.0;
 }
 
@@ -51,7 +59,7 @@ int main (int argc, char *argv[]) {
     double x = x0;
     double v = v0;
     for (int i = 0; i * h <= targetSec ; i++){
-        printf("%lf %lf %lf %lf\n", t, x, v, 1.0/2.0*m*v*v+1.0/2.0*k*x*x);
+        printf("%lf %lf\n", t, 1.0/2.0*m*v*v+1.0/2.0*k*x*x);
         next_vx(&x, &v, h);
         t += h;
     }
