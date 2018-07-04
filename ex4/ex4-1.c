@@ -1,6 +1,6 @@
 #include "../lib/cmatrix.h"
 #include "../lib/dgemm.h"
-// include mersenne_twister
+#include "../lib/mersenne_twister.h"
 #include <stdio.h>
 #include <math.h>
 
@@ -8,8 +8,20 @@
 double *alpha, double *A, int *ldA, double *x, int *incx, 
 double *beta , double *y, int *incy); */
 
-// mat_elem で簡単に行列要素を表現できるように、ベクトルについても同じように表現できるようにする
+// mat_elem で簡単に行列要素を表現できるように、
+// ベクトルについても同じように表現できるようにする
 #define vec_elem(vec, i) (vec)[i]
+
+void test(double ***target,int n) {
+  double **mat_target = *target;
+  mat_target = alloc_dmatrix(n, n);
+  for (int j = 0; j < n; ++j) {
+    for (int i = 0; i < n; ++i) {
+      mat_elem(mat_target, i, j) = fmin(i+1,j+1);
+    }
+  }
+  *target = mat_target;
+}
 
 int main() {
   int n = 5;
@@ -22,14 +34,15 @@ int main() {
   double beta = 0.0;
 
   /* generate target matrix */
-  mat_target = alloc_dmatrix(n, n);
+  /* mat_target = alloc_dmatrix(n, n);
   for (j = 0; j < n; ++j) {
     for (i = 0; i < n; ++i) {
       mat_elem(mat_target, i, j) = fmin(i+1,j+1);
     }
-  }
+  } */
+  test(&mat_target, n);
   // output
-  // fprint_dmatrix(stdout, n, n, matA);
+  fprint_dmatrix(stdout, n, n, mat_target);
 
   // generate random vector
   vec_trial = alloc_dvector(n);
