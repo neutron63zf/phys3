@@ -1,5 +1,5 @@
 // 
-#include "cmatrix.h"
+#include "../lib/cmatrix.h"
 #include <stdio.h>
 
 /* http://www.netlib.org/lapack/explore-html/d3/d6a/dgetrf_8f.html */
