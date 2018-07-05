@@ -71,22 +71,65 @@ double dot(int n, double *x, double *y) {
 // ベクトルを定数倍する関数
 // BLAS Level 1関数である、dscal_を使用
 // もとのベクトルは書き換えられてしまう
-double *calc_ax(int n, double a, double *x) {
+void *calc_ax(int n, double a, double **x) {
   int inc = 1;
-  dscal_(&n, &a, vec_ptr(x), &inc);
-  return x;
+  dscal_(&n, &a, vec_ptr(*x), &inc);
 }
 
+// 最大固有値の理論値を計算する関数
+// ちなみに、オーダーはn^2
+double lambda(int n) {
+  return (1.0 / 2.0)/(
+    1 - cos(M_PI / (2.0 * n + 1))
+  );
+}
 
+// v_nとv_{n+1}から暫定的に固有値を計算する関数
+double calc_lamdba(int n, double *v_np1, double *v_n) {
+  return
+    dot(n, v_np1, v_np1) /
+    dot(n, v_np1, v_n);
+}
+
+ 
 int main() {
-  int n = 5;
-  double **mat_target = make_matrix(n);
-  // fprint_dmatrix(stdout, n, n, mat_target);
-  double *vec_trial = make_rand_vector(n);
-  fprint_dvector(stdout, n, vec_trial);
-  double *y = calc_Ax(n, mat_target, vec_trial);
-  fprint_dvector(stdout, n, y);
-  double _dot = dot(n, vec_trial, y);
-  printf("%lf\n", _dot);
+  // 次元の設定
+  // 今の所113くらいが限界
+  int n = 100;
+  // 収束判定に用いる。理論値との差がここまで縮んだらループを止める
+  double t = pow(2, -32);
+
+  // 初期値
+  double **A = make_matrix(n);
+  double *v_n = make_rand_vector(n);
+  double *v_np1;
+  double vlambda;
+
+  // 収束先の値
+  double climax = lambda(n);
+
+  // メインループ
+  int i = 1;
+  do {
+    // v_{n+1}を計算
+    v_np1 = calc_Ax(n, A, v_n);
+    // lambdaの暫定値を計算
+    vlambda = calc_lamdba(n, v_np1, v_n);
+    // 現在のlambdaを出力
+    printf("%d %lf\n", i, vlambda);
+
+    // v_nにv_{n+1}を代入
+    v_n = v_np1;
+    // 計算のたびにv_nの絶対値はlambdaだけ大きくなるので、それを打ち消す
+    calc_ax(n, 1.0 / vlambda, &v_n);
+    // iを加算
+    i++;
+  } while (
+    // 計算結果の差がt以上の場合は計算を続ける
+    fabs(vlambda - climax) >= t
+  );
+  // ついでに収束先も表示してあげる
+  printf("∞  %lf\n", climax);
+
   return 0;
 }
