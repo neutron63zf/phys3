@@ -101,6 +101,12 @@ double **make_vandermonde(int n, double* det) {
       mat_elem(mat, i, j) = pow(base, i);
     }
   }
+  *det = 1;
+  for (int j = 0; j < n; ++j) {
+    for (int i = 0; i < j; ++i) {
+      *det *= mat_elem(mat, 1, j) - mat_elem(mat, 1, i);
+    }
+  }
   return mat;
 }
 
@@ -139,6 +145,7 @@ int main(int argc, char** argv) {
   double vandet;
   double **van = make_vandermonde(n, &vandet);
   fprint_dmatrix(stdout, n, n, van);
+  printf("det Vand(n): %lf\n", vandet);
   
   // メモリ解放
   free_dmatrix(mat);
