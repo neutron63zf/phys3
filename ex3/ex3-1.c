@@ -96,7 +96,7 @@ double **make_vandermonde(int n, double* det) {
   double **mat = alloc_dmatrix(n, n);
   double base;
   for (int j = 0; j < n; ++j) {
-    base = genrand_real3();
+    base = 5 * genrand_real3();
     for (int i = 0; i < n; ++i) {
       mat_elem(mat, i, j) = pow(base, i);
     }
@@ -111,6 +111,8 @@ double **make_vandermonde(int n, double* det) {
 }
 
 int main(int argc, char** argv) {
+
+/*
 
   char* filename = parse_filename(argc, argv);
 
@@ -151,4 +153,18 @@ int main(int argc, char** argv) {
   free_dmatrix(mat);
   free_dvector(vec);
   free_ivector(ipiv);
+
+*/
+  int n = 5;
+  double vandet;
+  double **van = make_vandermonde(n, &vandet);
+  fprint_dmatrix(stdout, n, n, van);
+
+  printf("theory : %lf\n", vandet);
+
+  int *ipiv = lu_decomp(n, &van);
+
+  double det = detA(n, van, ipiv);
+
+  printf("calced : %lf\n", det);
 }
