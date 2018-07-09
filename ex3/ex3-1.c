@@ -89,6 +89,21 @@ double detA(int dim, double** mat, int *ipiv) {
   return det;
 }
 
+// ファンデルモンド行列を返し、理論的な行列式も出す
+double **make_vandermonde(int n, double* det) {
+  int seed = 5153;
+  init_genrand(seed);
+  double **mat = alloc_dmatrix(n, n);
+  double base;
+  for (int j = 0; j < n; ++j) {
+    base = genrand_real3();
+    for (int i = 0; i < n; ++i) {
+      mat_elem(mat, i, j) = pow(base, i);
+    }
+  }
+  return mat;
+}
+
 int main(int argc, char** argv) {
 
   char* filename = parse_filename(argc, argv);
@@ -120,6 +135,10 @@ int main(int argc, char** argv) {
   
   printf("Solution X (transposed):\n");
   fprint_dvector(stdout, n, vec);
+
+  double vandet;
+  double **van = make_vandermonde(n, &vandet);
+  fprint_dmatrix(stdout, n, n, van);
   
   // メモリ解放
   free_dmatrix(mat);
