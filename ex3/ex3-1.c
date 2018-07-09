@@ -4,6 +4,10 @@
 #include <stdio.h>
 #include <math.h>
 
+// mat_elem で簡単に行列要素を表現できるように、
+// ベクトルについても同じように表現できるようにする
+#define vec_elem(vec, i) (vec)[i]
+
 /* http://www.netlib.org/lapack/explore-html/d3/d6a/dgetrf_8f.html */
 extern void dgetrf_(int *M, int *N, double *A, int *LDA, int*IPIV, int *INFO);
 
@@ -57,6 +61,8 @@ int *lu_decomp (int dim, double*** mat) {
 }
 
 // ベクトルと行列を与え、方程式を解く。もとのベクトルは書き換えられてしまう。
+// 与える行列は、もとの行列をLU分解したものである必要がある
+// また、ピボットベクトルも、LU分解の際に生成されたものである必要がある
 void solve(int dim, double*** mat, double** vec, int *ipiv) {
   char normal = 'N';
   int info;
@@ -70,6 +76,19 @@ void solve(int dim, double*** mat, double** vec, int *ipiv) {
 
 }
 
+// 行列式を返す関数
+// LU分解されていることが前提で、ipivはその際に生成されたピボットベクトル
+double detA(int dim, double** mat, int *ipiv) {
+  double det = 1;
+  for (int i = 0; i < dim; ++i) {
+    det *= mat_elem(mat, i, i);
+    if (vec_elem(ipiv, i) - 1 != i) {
+      det *= -1;
+    }
+  }
+  return det;
+}
+
 int main(int argc, char** argv) {
 
   char* filename = parse_filename(argc, argv);
@@ -79,31 +98,30 @@ int main(int argc, char** argv) {
   double *vec;
   int n = read_data(filename, &mat, &vec);
 
-  /*
   printf("Matrix A:\n");
   fprint_dmatrix(stdout, n, n, mat);
   printf("Vector B (transposed):\n");
   fprint_dvector(stdout, n, vec);
-  */
 
   // LU分解を行う
   int *ipiv = lu_decomp(n, &mat);
   
-  /*
   printf("Result of LU decomposition:\n");
   fprint_dmatrix(stdout, n, n, mat);
   printf("Pivot for LU decomposition:\n");
   fprint_ivector(stdout, n, ipiv);
-  */
+
+  // det mat
+  double det = detA(n, mat, ipiv);
+  printf("det A: %lf\n", det);
 
   // 方程式を解く
   solve(n, &mat, &vec, ipiv);
-
-  /*
+  
   printf("Solution X (transposed):\n");
   fprint_dvector(stdout, n, vec);
-  */
   
+  // メモリ解放
   free_dmatrix(mat);
   free_dvector(vec);
   free_ivector(ipiv);
