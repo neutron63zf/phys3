@@ -91,8 +91,6 @@ double detA(int dim, double** mat, int *ipiv) {
 
 // ファンデルモンド行列を返し、理論的な行列式も出す
 double **make_vandermonde(int n, double* det) {
-  int seed = 5153;
-  init_genrand(seed);
   double **mat = alloc_dmatrix(n, n);
   double base;
   for (int j = 0; j < n; ++j) {
@@ -155,16 +153,18 @@ int main(int argc, char** argv) {
   free_ivector(ipiv);
 
 */
+  int base_seed = 5153;
   int n = 5;
   double vandet;
-  double **van = make_vandermonde(n, &vandet);
-  fprint_dmatrix(stdout, n, n, van);
-
-  printf("theory : %lf\n", vandet);
-
-  int *ipiv = lu_decomp(n, &van);
-
-  double det = detA(n, van, ipiv);
-
-  printf("calced : %lf\n", det);
+  for(int i = 0; i < 1000; i++){
+    int seed = base_seed + i;
+    init_genrand(seed);
+    double **van = make_vandermonde(n, &vandet);
+    // fprint_dmatrix(stdout, n, n, van);
+    // printf("theory : %lf\n", vandet);
+    int *ipiv = lu_decomp(n, &van);
+    double det = detA(n, van, ipiv);
+    // printf("calced : %lf\n", det);
+    printf("error : %lf\n", (det - vandet)/vandet);
+  }
 }
