@@ -5,3 +5,7 @@ a.out
 ._*
 /report*
 /lecture
+/ex3/for_time/
+/.vscode
+*.zip
+*.txt
