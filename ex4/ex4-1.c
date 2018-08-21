@@ -4,6 +4,8 @@
 #include <stdio.h>
 #include <math.h>
 
+# define M_PI  3.14159265358979323846 /* pi */
+
 // BLASのライブラリの関数を使うための宣言
 // （これを入れなくても動くが、警告が消えてすっきりする）
 void dgemv_(char *trans, int *m, int *n, 
