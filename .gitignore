@@ -1,11 +1,12 @@
+# basic files
 a.out
 *.o
 .DS_Store
 ._.DS_Store
 ._*
-/report*
-/lecture
-/ex3/for_time/
 /.vscode
 *.zip
 *.txt
+
+# special folders
+/*local
