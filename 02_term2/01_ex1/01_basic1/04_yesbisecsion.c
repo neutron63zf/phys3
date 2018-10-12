@@ -1,14 +1,13 @@
 #include <stdio.h>
 #include <math.h>
-# define M_PI  3.14159265358979323846 /* pi */
 
-double f(double x) { return tanh(x) + 0.2 * x + 0.3; }
+double f(double x) { return pow(x, 3) - 3 * pow(x, 2) + x + 3; }
 
 int main() {
   double a, b, x;
-  double delta = 1.0e-1;
+  double delta = -1.0e-1;
   double epsilon = 1.0e-8;
-  a = -1;
+  a = 1;
   b = a + delta;
   printf("# Find initial enclosure\n");
   while (f(a) * f(b) > 0) {
