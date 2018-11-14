@@ -1,5 +1,4 @@
 #include "../../../00_lib/cmatrix.h"
-#include "../../../00_lib/dsyev.h"
 #include "../../../00_lib/mersenne_twister.h"
 #include <stdio.h>
 #include <math.h>
@@ -194,7 +193,7 @@ int main(int argc, char** argv) {
 
   int dim = n - 1; /* dimension of Hamiltonian */
   
-  printf("\n------\n\n# n: %10d\n", n);
+  printf("\n#------\n\n# n: %10d\n", n);
   printf("# v: %10.5f\n", v);
   printf("# width: %10.5f\n", width);
   if (mode == 1) {
