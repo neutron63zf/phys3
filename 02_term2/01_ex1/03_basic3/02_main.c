@@ -143,7 +143,7 @@ void power_method (double t, double** A, int n, double** eigen_vec, double* eige
     // lambdaの暫定値を計算
     vlambda_np1 = calc_lamdba(n, v_np1, v_n);
     // 現在のlambdaを出力
-    if (mode) {
+    if (mode == 1) {
       printf("%d %lf\n", i, fabs(vlambda_np1 - vlambda_n));
     }
 
@@ -194,7 +194,7 @@ int main(int argc, char** argv) {
 
   int dim = n - 1; /* dimension of Hamiltonian */
   
-  printf("# n: %10d\n", n);
+  printf("\n------\n\n# n: %10d\n", n);
   printf("# v: %10.5f\n", v);
   printf("# width: %10.5f\n", width);
   if (mode == 1) {
@@ -222,6 +222,6 @@ int main(int argc, char** argv) {
     print_vector(dim, evec, print_start, print_end);
     printf("%lf %lf\n", 1.0, 0.0);
     printf("\n# eigenvalue ->\n# %lf\n", eval);
-    printf("\n# (for changing offet)\n# E / 2 ->\n# %lf\n", eval / 2);
+    printf("\n# (for changing offet)\n# -E/2 ->\n# %lf\n", -eval / 2);
   }
 }
