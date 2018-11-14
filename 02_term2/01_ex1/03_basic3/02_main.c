@@ -24,25 +24,23 @@ double potential(double x, double v, double width, double offset) {
   return value;
 }
 
-void extract_argv(int* n, double* v, double* width, double* offset, int argc, char** argv) {
+void extract_argv(int* n, double* v, double* width, double* offset, int* mode, int argc, char** argv) {
   if (argc < 5) {
-    fprintf(stderr, "Usage: %s n v width offset\n", argv[0]);
+    fprintf(stderr, "Usage: %s n v width offset mode\n", argv[0]);
     exit(1);
   }
   *n = atoi(argv[1]);
   *v = atof(argv[2]);
   *width = atof(argv[3]);
   *offset = atof(argv[4]);
+  *mode = atoi(argv[5]);
 }
 
-double** prepare_mat(int dim, int num_states, double v, double width, double offset) {
+double** prepare_mat(int dim, double v, double width, double offset) {
   int n = dim + 1;
   double h = 1.0 / n;
   double diag = 2.0 / (h*h);
   double offdiag = -1.0 / (h*h);
-  if (num_states > dim) {
-    num_states = dim;
-  }
   
   /* preparation of Mat */
   double **mat = alloc_dmatrix(dim, dim);
@@ -128,7 +126,7 @@ double calc_lamdba(int n, double *v_np1, double *v_n) {
  * eigen_vec 返り値、固有ベクトル
  * eigen_value 返り値、固有値
  */
-void power_method (double t, double** A, int n, double** eigen_vec, double* eigen_value) {
+void power_method (double t, double** A, int n, double** eigen_vec, double* eigen_value, double offset, int mode) {
   double *v_n = make_rand_vector(n);
   double *v_np1;
   double vlambda_n = 0;
@@ -145,7 +143,9 @@ void power_method (double t, double** A, int n, double** eigen_vec, double* eige
     // lambdaの暫定値を計算
     vlambda_np1 = calc_lamdba(n, v_np1, v_n);
     // 現在のlambdaを出力
-    printf("%d %lf\n", i, fabs(vlambda_np1 - vlambda_n));
+    if (mode) {
+      printf("%d %lf\n", i, fabs(vlambda_np1 - vlambda_n));
+    }
 
     // v_nにv_{n+1}を代入
     v_n = v_np1;
@@ -159,35 +159,69 @@ void power_method (double t, double** A, int n, double** eigen_vec, double* eige
     // i < 30
     1
   );
-  *eigen_value = vlambda_np1;
+  *eigen_value = vlambda_np1 - offset;
   *eigen_vec = v_np1;
+}
+
+// ベクトルをgnuplotで表示できるような形式で出力する
+void print_vector (int n, double* vec, double start, double end) {
+  double x;
+  for (int i = 0; i < n; ++i) {
+    // i = 0     -> x = start
+    // i = n - 1 -> x = end
+    x = start + ( end - start ) / ( n - 1 ) * i;
+    printf("%lf %lf\n", x, vec_elem(vec, i));
+  }
+}
+
+// ベクトルを1に規格化
+double* normalize_vector(int n, double* vec) {
+  double l2_norm = sqrt(dot(n, vec, vec));
+  double* new_vec = alloc_dvector(n);
+  for (int i = 0; i < n; ++i) {
+    vec_elem(new_vec, i) = vec_elem(vec, i) / l2_norm;
+  }
+  return new_vec;
 }
 
 int main(int argc, char** argv) {
   int n; /* partition number */
   double v; /* height of potential between two wells */
   double width; /* width of wall between two wells */
-  double offset;
-  // TODO: モード付きでやるように。
-  /**
-   * モード0なら結果のみ
-   * それ以外なら途中経過のみ
-   */
-  extract_argv(&n, &v, &width, &offset, argc, argv);
+  double offset; /* potential offset */
+  int mode; /* execution mode */
+  extract_argv(&n, &v, &width, &offset, &mode, argc, argv);
 
-  int num_states = 1; /* number of eigenstates to be printed out */
   int dim = n - 1; /* dimension of Hamiltonian */
   
-  int i, j;
-  
+  printf("# n: %10d\n", n);
+  printf("# v: %10.5f\n", v);
+  printf("# width: %10.5f\n", width);
+  if (mode == 1) {
+    printf("# mode: 1 -> print convergence\n");
+  }
+
   /* preparation of Mat */
-  double **mat = prepare_mat(dim, num_states, v, width, offset);
+  double **mat = prepare_mat(dim, v, width, offset);
 
-  double t = pow(2, -32);
-  double *evec = alloc_dvector(dim);
-  double eval;
-  power_method(t, mat, dim, &evec, &eval);
-  eval -= offset;
+  /* power method */
+  double t = pow(2, -32);  /* power method threshold */
+  double *evec = alloc_dvector(dim); /* eigenvector */
+  double eval; /* eigenvalue */
+  power_method(t, mat, dim, &evec, &eval, offset, mode);
 
-  printf("# eigenvalue ->\n# %lf", eval);
+  /* normalize vector */
+  evec = normalize_vector(dim, evec);
+
+  /* print out eigenstate/eigenvalue */
+  if (mode == 0) {
+    printf("# mode: 0 -> print eigenstate/eigenvalue\n\n");
+    double print_start = 1.0 / n;
+    double print_end = 1.0 - print_start;
+    printf("%lf %lf\n", 0.0, 0.0);
+    print_vector(dim, evec, print_start, print_end);
+    printf("%lf %lf\n", 1.0, 0.0);
+    printf("\n# eigenvalue ->\n# %lf\n", eval);
+    printf("\n# (for changing offet)\n# E / 2 ->\n# %lf\n", eval / 2);
+  }
 }
