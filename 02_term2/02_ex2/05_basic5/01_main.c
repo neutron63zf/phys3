@@ -8,6 +8,20 @@
 #define M_PI 3.14159265358979323846
 #define vec_elem(vec, i) (vec)[i]
 
+void print_spin(int* spin, int L) {
+  int num_sites = L * L;
+  printf("# ");
+  for (int i = 0; i < num_sites; ++i) {
+    if (vec_elem(spin, i) > 0) {
+      printf("+");
+    } else {
+      printf("-");
+    }
+    printf(" ");
+  }
+  printf("\n");
+}
+
 // 乱数を初期化
 void init_rand () {
   // シードで乱数を初期化
@@ -114,12 +128,14 @@ void each_montecarlo_step(
     delta = 0.0;
     for (j = 0; j < num_neighbors; ++j) {
       v = neighbor(s, j, lattice);
-      delta += 2 * J * spin[s] * spin[v];
+      delta += -2.0 * J * spin[s] * spin[v];
     }
     if (ran() < exp(-beta * delta)) {
       spin[s] = -1 * spin[s];
       *m += (2.0 * spin[s]) / num_sites; 
       *e += delta;
+      // printf("# delta: %lf\n", delta);
+      // print_spin(spin,L);
     }
   }
   
@@ -143,6 +159,27 @@ void calc_em(
     }
     *m += 1.0 * spin[s] / num_sites;
   }
+}
+
+// 物理量を計算、表示
+void print_values (
+  double T, int L, int sample_steps, double* E, double* E2, double* M2
+) {
+  double E_ave, E2_ave, M2_ave, C;
+  int N = L * L;
+  E_ave = 0.0;
+  E2_ave = 0.0;
+  M2_ave = 0.0;
+  for (int i = 0; i < sample_steps; ++i) {
+    E_ave += vec_elem(E, i) / sample_steps;
+    E2_ave += vec_elem(E2, i) / sample_steps;
+    M2_ave += vec_elem(M2, i) / sample_steps;
+  }
+  C = 1.0 / (N * pow(T, 2)) * (E2_ave - pow(E_ave, 2));
+  printf("# T: %lf ->\n", T);
+  printf("# E: %lf\n", E_ave);
+  printf("# M2: %lf\n", M2_ave);
+  printf("# C: %lf\n", C);
 }
 
 // メイン処理
@@ -172,16 +209,11 @@ void metropolis_montecarlo(
   
   // エネルギー、エネルギーの自乗、磁化の自乗
   for (int i = 0; i < MS; ++i) {
-    each_montecarlo_step(
-      T, L, spin, lattice,
-      &e, &m
-    );
-    e2 = pow(e, 2);
-    m2 = pow(m, 2);
-    fprint_ivector(stdout, L*L, spin);
-
     // 最初のignoreステップが過ぎたら記録をしていく
+    // print_spin(spin,L);
     if (i >= ignore) {
+      e2 = pow(e, 2);
+      m2 = pow(m, 2);
       int eq_index = i - ignore;
       vec_elem(E, eq_index) = e;
       vec_elem(M, eq_index) = m;
@@ -189,7 +221,14 @@ void metropolis_montecarlo(
       vec_elem(M2, eq_index) = m2;
       printf("%d %lf %lf\n", eq_index, e, m2);
     }
+    each_montecarlo_step(
+      T, L, spin, lattice,
+      &e, &m
+    );
   }
+
+  // 熱容量を計算
+  print_values(T, L, sample_steps, E, E2, M2);
 }
 
 // 実行エントリーポイント
@@ -205,7 +244,29 @@ int main(int argc, char** argv) {
 
   int *spin = ising_random_grid(L);
   
-  // fprint_ivector(stdout, L*L, spin);
+  /*
+    spin[0] = +1;
+    spin[1] = -1;
+    spin[2] = +1;
+    spin[3] = -1;
+
+    spin[4] = -1;
+    spin[5] = +1;
+    spin[6] = -1;
+    spin[7] = +1;
+
+    spin[8] = +1;
+    spin[9] = -1;
+    spin[10] = +1;
+    spin[11] = -1;
+
+    spin[12] = -1;
+    spin[13] = +1;
+    spin[14] = -1;
+    spin[15] = +1;
+  //*/
+
+  // print_spin(spin, L);
 
   metropolis_montecarlo(
     T, L, spin,
