@@ -23,9 +23,12 @@ double potential(double x, double v, double width, double offset) {
   return value;
 }
 
-void extract_argv(int* n, double* v, double* width, double* offset, int* mode, int argc, char** argv) {
-  if (argc < 5) {
-    fprintf(stderr, "Usage: %s n v width offset mode\n", argv[0]);
+void extract_argv(
+  int* n, double* v, double* width, double* offset, int* mode, double* tpow,
+  int argc, char** argv
+) {
+  if (argc < 6) {
+    fprintf(stderr, "Usage: %s n v width offset mode tpow\n", argv[0]);
     exit(1);
   }
   *n = atoi(argv[1]);
@@ -33,6 +36,7 @@ void extract_argv(int* n, double* v, double* width, double* offset, int* mode, i
   *width = atof(argv[3]);
   *offset = atof(argv[4]);
   *mode = atoi(argv[5]);
+  *tpow = atof(argv[6]);
 }
 
 double** prepare_mat(int dim, double v, double width, double offset) {
@@ -189,11 +193,15 @@ int main(int argc, char** argv) {
   double width; /* width of wall between two wells */
   double offset; /* potential offset */
   int mode; /* execution mode */
-  extract_argv(&n, &v, &width, &offset, &mode, argc, argv);
+  double tpow;
+  extract_argv(
+    &n, &v, &width, &offset, &mode, &tpow,
+    argc, argv
+  );
 
   int dim = n - 1; /* dimension of Hamiltonian */
   
-  printf("\n#------\n\n# n: %10d\n", n);
+  printf("#------\n# n: %10d\n", n);
   printf("# v: %10.5f\n", v);
   printf("# width: %10.5f\n", width);
   if (mode == 1) {
@@ -204,7 +212,7 @@ int main(int argc, char** argv) {
   double **mat = prepare_mat(dim, v, width, offset);
 
   /* power method */
-  double t = pow(2, -32);  /* power method threshold */
+  double t = pow(2, tpow);  /* power method threshold */
   double *evec = alloc_dvector(dim); /* eigenvector */
   double eval; /* eigenvalue */
   power_method(t, mat, dim, &evec, &eval, offset, mode);

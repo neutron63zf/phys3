@@ -13,7 +13,7 @@
   // 引数を抜き取る
   // コマンドラインから引数を抜き取る
   void extract_args(
-    // mainの引数
+    // main の引数
     int argc, char** argv,
     // -> システムサイズ、総ステップ数、最初の無視する値
     int* L, int* MS, int* ignore, double* T, int* mode
@@ -33,7 +33,7 @@
 
 /** 出力系 **/
 
-  // スピンの±を表示
+  // スピンの± を表示
   void print_spin(int* spin, int L) {
     int num_sites = L * L;
     printf("# ");
@@ -84,7 +84,7 @@
     init_genrand(seed);
   }
 
-  // (0,1)区間での一様乱数
+  // (0,1) 区間での一様乱数
   double ran () {
     double x = genrand_real3();
     return x;
@@ -124,12 +124,10 @@
         mat_elem(neighbor, i, 3) = j;
       }
     }
-    //fprint_imatrix(stdout, L*L, 4, neighbor);
-    //printf("# %d\n", mat_elem(neighbor,L*L -1, 2));
     return neighbor;
   }
 
-  // sのスピンに最近接しているj個目のsiteの番号
+  // s のスピンに最近接しているj 個目のsite の番号
   int neighbor(
     int s, int j, int** lattice
   ) {
@@ -157,7 +155,7 @@
     return grid;
   }
 
-  // 最初のEとMを計算するのに使う
+  // 最初のE とM を計算するのに使う
   void calc_em(
     int L, int* spin, int** lattice,
     double* e, double* m
@@ -203,8 +201,6 @@
         spin[s] = -1 * spin[s];
         *m += (2.0 * spin[s]) / num_sites; 
         *e += delta;
-        // printf("# delta: %lf\n", delta);
-        // print_spin(spin,L);
       }
     }
     
@@ -234,9 +230,7 @@
         T, L, spin, lattice,
         &e, &m
       );
-      // printf("\r#%d", i);
     }
-    // printf("\n");
   }
 
 //
@@ -252,7 +246,6 @@
     double denomi = A2_ave - A_ave2;
     double tau = 0.0;
     for (int t = 0; t < sample_steps; ++t) {
-      // t = 0,1,2...sample_steps,
       int i_number = sample_steps - t;
       double C = 0.0;
       for (int i = 0; i < i_number; ++i) {
@@ -261,9 +254,7 @@
       if (0 < C && C < 1) {
         tau += (-1.0 / log(C)) * t / sample_steps;
       }
-      // printf("\r# t: %d, C: %lf, tau: %lf", t, C, tau);
     }
-    // printf("\n");
     return tau;
   }
 
@@ -319,17 +310,6 @@
       double E4 = calc_ave(sample_steps, E4_arr);
       double E2_s = sqrt(E4 - pow(E2, 2));
       *C_s = calc_C_s(N, T, *E, *E_s, E2_s);
-
-      /*
-
-      printf("# E:%lf\n",*E);
-      printf("# E_s:%lf\n",*E_s);
-      printf("# M2:%lf\n",*M2);
-      printf("# M2_s:%lf\n",*M2_s);
-      printf("# C:%lf\n",*C);
-      printf("# C_s:%lf\n",*C_s);
-
-      */
     //
 
     // 自己相関時間と係数
@@ -337,15 +317,13 @@
         sample_steps, E_arr,
         *E, E2
       );
-      // printf("# tau:%lf\n",tau);
       double scale = sqrt(1 + 2 * tau);
-      // printf("# scale:%lf\n",scale);
     //
 
     // 再推定
-      *E_s = *E_s / scale;
-      *M2_s = *M2_s / scale;
-      *C_s = *C_s / scale;
+      *E_s = *E_s * scale;
+      *M2_s = *M2_s * scale;
+      *C_s = *C_s * scale;
     //
   }
 
